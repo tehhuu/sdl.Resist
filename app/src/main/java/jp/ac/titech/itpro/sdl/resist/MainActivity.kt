@@ -15,7 +15,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var manager: SensorManager? = null
     private var gyroscope: Sensor? = null
     private var time: Long = 0
-    private var angle: Double = 0.0
+    private var angle = 0.0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -31,14 +31,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         if (gyroscope == null) {
             Toast.makeText(this, R.string.toast_no_gyroscope, Toast.LENGTH_LONG).show()
         }
-        rotationView!!.setDirection(0.0)
     }
 
     override fun onResume() {
         super.onResume()
         Log.d(TAG, "onResume")
         manager!!.registerListener(this, gyroscope, SensorManager.SENSOR_DELAY_FASTEST)
-        rotationView!!.setDirection(0.0)
     }
 
     override fun onPause() {
@@ -49,9 +47,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent) {
         val omegaZ = event.values[2] // z-axis angular velocity (rad/sec)
+        if (time == 0L){
+            time = event.timestamp
+            return
+        }
         angle += (event.timestamp - time) * omegaZ / 1000000000
         rotationView!!.setDirection(angle)
-        time = event.timestamp
+        time += (event.timestamp - time)
     }
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
